@@ -9,7 +9,9 @@ import { Checkbox } from '@/framework/ui/checkbox'
 import { Input } from '@/framework/ui/input'
 import { Label } from '@/framework/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/framework/ui/select'
+import { Textarea } from '@/framework/ui/textarea'
 import { previewDataset, useSaveDataset, useSources, type Dataset, type DatasetForm } from './api'
+import { builtinText, fieldText, revertBuiltin, sourceText } from './builtinText'
 import { ChartView } from './ChartView'
 import { emptyChartConfig } from './chartData'
 import { FilterEditor } from './FilterEditor'
@@ -51,7 +53,7 @@ export function DatasetDialog({ open, onOpenChange, editing }: Props) {
   const submit = async () => {
     if (!valid) return
     try {
-      await save.mutateAsync({ id: editing?.id, data: { ...form, name: form.name.trim() } })
+      await save.mutateAsync({ id: editing?.id, data: { ...form, name: revertBuiltin(t, editing?.name, form.name.trim()) } })
       toast.success(t('common.operateSuccess'))
       onOpenChange(false)
     } catch {
@@ -90,11 +92,11 @@ export function DatasetDialog({ open, onOpenChange, editing }: Props) {
       >
         <FormGrid>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="ds-name">{t('common.name')}</Label>
-            <Input id="ds-name" value={form.name} maxLength={100} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+            <Label htmlFor="ds-name" required>{t('common.name')}</Label>
+            <Input id="ds-name" value={builtinText(t, form.name)} maxLength={100} onChange={(e) => setForm({ ...form, name: e.target.value })} />
           </div>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="ds-source">{t('plugin_report.dataset.source')}</Label>
+            <Label htmlFor="ds-source" required>{t('plugin_report.dataset.source')}</Label>
             <Select value={form.source} onValueChange={(v) => setForm({ ...form, source: v, columns: [], filters: [] })}>
               <SelectTrigger id="ds-source">
                 <SelectValue placeholder={t('common.pleaseSelect')} />
@@ -102,7 +104,7 @@ export function DatasetDialog({ open, onOpenChange, editing }: Props) {
               <SelectContent>
                 {sources.map((s) => (
                   <SelectItem key={s.table} value={s.table}>
-                    {t(`plugin_report.source.${s.table}`, { defaultValue: s.label })}
+                    {sourceText(t, s.table, s.label)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -110,7 +112,10 @@ export function DatasetDialog({ open, onOpenChange, editing }: Props) {
           </div>
           <FormGridFull>
             <fieldset className="flex flex-col gap-2">
-              <legend className="mb-1 text-sm font-medium">{t('plugin_report.dataset.columns')}</legend>
+              <legend className="mb-1 text-sm font-medium">
+                {t('plugin_report.dataset.columns')}
+                <span aria-hidden="true" className="ms-0.5 text-destructive">*</span>
+              </legend>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
                 {(src?.columns ?? []).map((c) => (
                   <label key={c.name} className="flex min-h-10 items-center gap-2 rounded-md border border-border px-3 text-sm">
@@ -124,7 +129,7 @@ export function DatasetDialog({ open, onOpenChange, editing }: Props) {
                         })
                       }
                     />
-                    <span className="truncate">{t(`plugin_report.field.${c.name}`, { defaultValue: c.label })}</span>
+                    <span className="truncate">{fieldText(t, form.source, c.name, c.label)}</span>
                     <span className="ms-auto text-xs text-muted-foreground">{t(`plugin_report.colType.${c.type}`)}</span>
                   </label>
                 ))}
@@ -136,13 +141,13 @@ export function DatasetDialog({ open, onOpenChange, editing }: Props) {
             <div className="flex flex-col gap-2">
               <Label>{t('plugin_report.dataset.fixedFilters')}</Label>
               <p className="text-xs text-muted-foreground">{t('plugin_report.dataset.fixedFiltersHint')}</p>
-              <FilterEditor columns={selectable} value={form.filters} onChange={(filters) => setForm({ ...form, filters })} />
+              <FilterEditor table={form.source} columns={selectable} value={form.filters} onChange={(filters) => setForm({ ...form, filters })} />
             </div>
           </FormGridFull>
           <FormGridFull>
             <div className="flex flex-col gap-2">
               <Label htmlFor="ds-remark">{t('common.remark')}</Label>
-              <Input id="ds-remark" value={form.remark} maxLength={255} onChange={(e) => setForm({ ...form, remark: e.target.value })} />
+              <Textarea id="ds-remark" rows={3} value={form.remark} maxLength={255} onChange={(e) => setForm({ ...form, remark: e.target.value })} />
             </div>
           </FormGridFull>
         </FormGrid>

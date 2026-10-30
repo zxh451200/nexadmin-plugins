@@ -12,6 +12,7 @@ import { ChartView } from './ChartView'
 import { saveBlob } from './download'
 import { ReportFilters } from './ReportFilters'
 import { useChartResult } from './useChartResult'
+import { builtinText, columnText } from './builtinText'
 
 const SPAN: Record<number, string> = {
   1: 'md:col-span-1', 2: 'md:col-span-2', 3: 'md:col-span-3', 4: 'md:col-span-4', 5: 'md:col-span-5', 6: 'md:col-span-6',
@@ -25,9 +26,10 @@ function ChartCard({ reportId, chart, values }: { reportId: string; chart?: Char
   const onExport = async () => {
     if (!chart) return
     setExporting(true)
+    const headers = q.data ? q.data.columns.map((c) => columnText(t, q.data?.source, c)) : undefined
     try {
-      const { blob, truncated, ext } = await exportReportChart(reportId, chart.id, values)
-      saveBlob(blob, `${chart.name}.${ext}`)
+      const { blob, truncated, ext } = await exportReportChart(reportId, chart.id, values, { name: builtinText(t, chart.name), headers })
+      saveBlob(blob, `${builtinText(t, chart.name)}.${ext}`)
       if (truncated) toast.warning(t('plugin_report.report.exportTruncated'))
     } catch {
       toast.error(t('common.operateFailed'))
@@ -38,9 +40,9 @@ function ChartCard({ reportId, chart, values }: { reportId: string; chart?: Char
   return (
     <Card className="h-full">
       <CardHeader className="flex-row items-center justify-between gap-2 space-y-0 pb-2">
-        <CardTitle className="truncate text-base font-medium">{chart?.name ?? t('plugin_report.report.chartDeleted')}</CardTitle>
+        <CardTitle className="truncate text-base font-medium">{builtinText(t, chart?.name) || t('plugin_report.report.chartDeleted')}</CardTitle>
         {chart?.type === 'table' ? (
-          <Button variant="ghost" size="sm" disabled={exporting} onClick={() => void onExport()}>
+          <Button variant="ghost" size="sm" disabled={exporting || !q.data} onClick={() => void onExport()}>
             <Download aria-hidden="true" />
             {t('plugin_report.report.export')}
           </Button>
@@ -48,7 +50,15 @@ function ChartCard({ reportId, chart, values }: { reportId: string; chart?: Char
       </CardHeader>
       <CardContent>
         {chart ? (
-          <ChartView type={chart.type} result={q.data} config={chart.config} height={chart.type === 'table' ? 320 : 260} loading={q.isLoading} error={q.isError} />
+          <ChartView
+            type={chart.type}
+            result={q.data}
+            config={chart.config}
+            height={chart.type === 'table' ? 320 : chart.type === 'metric' ? 96 : 260}
+            showMetricLabel={chart.type !== 'metric'}
+            loading={q.isLoading}
+            error={q.isError}
+          />
         ) : (
           <p className="py-8 text-center text-sm text-muted-foreground">{t('plugin_report.report.chartDeleted')}</p>
         )}
@@ -76,17 +86,24 @@ export function ReportViewer({ reportId }: { reportId: string }) {
 
   return (
     <div className="flex flex-col gap-4">
+      <h2 className="text-base font-semibold">
+        {report.groupName ? `${builtinText(t, report.groupName)} / ${builtinText(t, report.name)}` : builtinText(t, report.name)}
+      </h2>
       <ReportFilters reportId={reportId} filters={report.config.filters} values={values} onChange={setValues} />
       {groups.length === 0 ? <EmptyState title={t('plugin_report.report.noCharts')} /> : null}
       {groups.map((g) => (
-        <section key={g.name} className="flex flex-col gap-3" aria-label={g.name || undefined}>
-          {g.name ? <h2 className="text-sm font-medium text-muted-foreground">{g.name}</h2> : null}
+        <section key={g.name} className="flex flex-col gap-3" aria-label={builtinText(t, g.name) || undefined}>
+          {g.name ? <h2 className="text-sm font-medium text-muted-foreground">{builtinText(t, g.name)}</h2> : null}
           <div className="grid grid-cols-1 gap-3 md:grid-cols-12">
-            {g.items.map((it) => (
-              <div key={it.chartId} className={cn('min-w-0', SPAN[it.span] ?? 'md:col-span-12')}>
-                <ChartCard reportId={reportId} chart={report.charts?.find((c) => c.id === it.chartId)} values={values} />
-              </div>
-            ))}
+            {g.items.map((it) => {
+              const chart = report.charts?.find((c) => c.id === it.chartId)
+              return (
+                // 指标卡只有一行数字：别被同一行的图表拉成大空白块
+                <div key={it.chartId} className={cn('min-w-0', SPAN[it.span] ?? 'md:col-span-12', chart?.type === 'metric' && 'self-start')}>
+                  <ChartCard reportId={reportId} chart={chart} values={values} />
+                </div>
+              )
+            })}
           </div>
         </section>
       ))}

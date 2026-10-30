@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { Eraser, Eye } from 'lucide-react'
+import { Eraser } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { Can } from '@/framework/auth/Can'
 import { DataTable, type Column } from '@/framework/components/DataTable'
+import { DetailAction } from '@/framework/components/DetailAction'
 import { DateRangePicker, type DateRangeValue } from '@/framework/components/DateRangePicker'
 import { FilterBar } from '@/framework/components/FilterBar'
 import { ResponsiveDialog } from '@/framework/components/ResponsiveDialog'
@@ -181,7 +182,7 @@ export function LogsTab() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={ALL}>{t('plugin_audit.fields.table')}: {t('plugin_audit.all')}</SelectItem>
+            <SelectItem value={ALL}>{t('plugin_audit.all')}</SelectItem>
             {(tables ?? []).map((n) => (
               <SelectItem key={n} value={n}>
                 {n}
@@ -202,7 +203,7 @@ export function LogsTab() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={ALL}>{t('plugin_audit.fields.action')}: {t('plugin_audit.all')}</SelectItem>
+            <SelectItem value={ALL}>{t('plugin_audit.all')}</SelectItem>
             {ACTIONS.map((a) => (
               <SelectItem key={a} value={a}>
                 {t(`plugin_audit.action.${a}`)}
@@ -212,7 +213,6 @@ export function LogsTab() {
         </Select>
         <DateRangePicker value={draft.range} onChange={(range) => setDraft({ ...draft, range })} placeholder={t('plugin_audit.fields.timeRange')} className="md:w-64" />
       </FilterBar>
-
       <DataTable
         columns={columns}
         data={data?.list ?? []}
@@ -237,11 +237,7 @@ export function LogsTab() {
             </Button>
           </Can>
         }
-        rowActions={(l) => (
-          <Button variant="ghost" size="icon" aria-label={t('plugin_audit.detail')} onClick={() => setDetail(l.id)}>
-            <Eye aria-hidden="true" />
-          </Button>
-        )}
+        rowActions={(l) => <DetailAction onClick={() => setDetail(l.id)} />}
       />
 
       <DetailDialog id={detail} onClose={() => setDetail(null)} />

@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { Eraser, Eye } from 'lucide-react'
+import { Eraser } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { Can } from '@/framework/auth/Can'
 import { DataTable, type Column } from '@/framework/components/DataTable'
+import { DetailAction } from '@/framework/components/DetailAction'
 import { FilterBar } from '@/framework/components/FilterBar'
 import { ResponsiveDialog } from '@/framework/components/ResponsiveDialog'
 import { Badge } from '@/framework/ui/badge'
@@ -182,7 +183,7 @@ export function LogsTab({ jobId, onJobChange }: Props) {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={ALL}>{t('plugin_cron.fields.job')}: {t('plugin_cron.all')}</SelectItem>
+            <SelectItem value={ALL}>{t('plugin_cron.all')}</SelectItem>
             {(jobs?.list ?? []).map((j) => (
               <SelectItem key={j.id} value={j.id}>
                 {j.name}
@@ -195,7 +196,7 @@ export function LogsTab({ jobId, onJobChange }: Props) {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={ALL}>{t('plugin_cron.fields.status')}: {t('plugin_cron.all')}</SelectItem>
+            <SelectItem value={ALL}>{t('plugin_cron.all')}</SelectItem>
             {STATUSES.map((s) => (
               <SelectItem key={s} value={s}>
                 {t(`plugin_cron.status.${s}`)}
@@ -204,7 +205,6 @@ export function LogsTab({ jobId, onJobChange }: Props) {
           </SelectContent>
         </Select>
       </FilterBar>
-
       <DataTable
         columns={columns}
         data={data?.list ?? []}
@@ -229,11 +229,7 @@ export function LogsTab({ jobId, onJobChange }: Props) {
             </Button>
           </Can>
         }
-        rowActions={(l) => (
-          <Button variant="ghost" size="icon" aria-label={t('plugin_cron.logDetail')} onClick={() => setDetail(l.id)}>
-            <Eye aria-hidden="true" />
-          </Button>
-        )}
+        rowActions={(l) => <DetailAction onClick={() => setDetail(l.id)} />}
       />
 
       <LogDetailDialog id={detail} onClose={() => setDetail(null)} />

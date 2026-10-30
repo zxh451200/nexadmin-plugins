@@ -9,7 +9,9 @@ import { Input } from '@/framework/ui/input'
 import { Label } from '@/framework/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/framework/ui/select'
 import { Switch } from '@/framework/ui/switch'
+import { Textarea } from '@/framework/ui/textarea'
 import { useChartOptions, useDatasetOptions, useSaveReport, type Report, type ReportFilter, type ReportForm } from './api'
+import { builtinText, fieldText, revertBuiltin } from './builtinText'
 
 const SPANS = [3, 4, 6, 8, 12]
 const blank = (): ReportForm => ({ name: '', groupName: '', remark: '', config: { items: [], filters: [] } })
@@ -37,12 +39,18 @@ export function ReportDialog({ open, onOpenChange, editing }: Props) {
   const setFilter = (i: number, p: Partial<ReportFilter>) => setCfg({ filters: cfg.filters.map((x, j) => (j === i ? { ...x, ...p } : x)) })
   const valid = form.name.trim() !== '' && cfg.items.every((it) => it.chartId) && cfg.filters.every((f) => f.label.trim() && f.datasetId && f.column)
   const fieldsOf = (id: string, timeOnly: boolean) => (datasets.find((d) => d.id === id)?.fields ?? []).filter((c) => !timeOnly || c.type === 'time')
+  const tableOf = (id: string) => datasets.find((d) => d.id === id)?.source
 
   const submit = async () => {
     if (!valid) return
-    const filters = cfg.filters.map((f, i) => ({ ...f, key: `f${i + 1}` })) // 重新编号，保证 key 唯一
+    // 内置行的名称/筛选器名在库里是 i18n 键：输入框显示译文，没改动就原样写回键，改过才存原文
+    const baseFilters = (editing?.config.filters ?? []).map((f) => f.label)
+    const filters = cfg.filters.map((f, i) => ({ ...f, key: `f${i + 1}`, label: revertBuiltin(t, baseFilters, f.label) })) // 重新编号，保证 key 唯一
     try {
-      await save.mutateAsync({ id: editing?.id, data: { ...form, name: form.name.trim(), config: { ...cfg, filters } } })
+      await save.mutateAsync({
+        id: editing?.id,
+        data: { ...form, name: revertBuiltin(t, editing?.name, form.name.trim()), groupName: revertBuiltin(t, editing?.groupName, form.groupName), config: { ...cfg, filters } },
+      })
       toast.success(t('common.operateSuccess'))
       onOpenChange(false)
     } catch {
@@ -78,15 +86,11 @@ export function ReportDialog({ open, onOpenChange, editing }: Props) {
         <FormGrid cols={3}>
           <div className="flex flex-col gap-2">
             <Label htmlFor="rp-name">{t('common.name')}</Label>
-            <Input id="rp-name" value={form.name} maxLength={100} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+            <Input id="rp-name" value={builtinText(t, form.name)} maxLength={100} onChange={(e) => setForm({ ...form, name: e.target.value })} />
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="rp-group">{t('plugin_report.report.group')}</Label>
-            <Input id="rp-group" value={form.groupName} maxLength={64} onChange={(e) => setForm({ ...form, groupName: e.target.value })} />
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="rp-remark">{t('common.remark')}</Label>
-            <Input id="rp-remark" value={form.remark} maxLength={255} onChange={(e) => setForm({ ...form, remark: e.target.value })} />
+            <Input id="rp-group" value={builtinText(t, form.groupName)} maxLength={64} onChange={(e) => setForm({ ...form, groupName: e.target.value })} />
           </div>
           <FormGridFull>
             <fieldset className="flex flex-col gap-2">
@@ -100,7 +104,7 @@ export function ReportDialog({ open, onOpenChange, editing }: Props) {
                     <SelectContent>
                       {charts.map((c) => (
                         <SelectItem key={c.id} value={c.id}>
-                          {c.name}
+                          {builtinText(t, c.name)}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -134,8 +138,8 @@ export function ReportDialog({ open, onOpenChange, editing }: Props) {
               <legend className="mb-1 text-sm font-medium">{t('plugin_report.report.filters')}</legend>
               <p className="text-xs text-muted-foreground">{t('plugin_report.report.filtersHint')}</p>
               {cfg.filters.map((f, i) => (
-                <div key={i} className="grid grid-cols-1 gap-2 rounded-md border border-border p-2 md:grid-cols-[1fr_9rem_1fr_1fr_auto]">
-                  <Input aria-label={t('plugin_report.report.filterLabel')} placeholder={t('plugin_report.report.filterLabel')} maxLength={50} value={f.label} onChange={(e) => setFilter(i, { label: e.target.value })} />
+                <div key={i} className="grid grid-cols-1 gap-2 md:grid-cols-[1fr_9rem_1fr_1fr_auto]">
+                  <Input aria-label={t('plugin_report.report.filterLabel')} placeholder={t('plugin_report.report.filterLabel')} maxLength={50} value={builtinText(t, f.label)} onChange={(e) => setFilter(i, { label: e.target.value })} />
                   <Select value={f.type} onValueChange={(v) => setFilter(i, { type: v as ReportFilter['type'], column: '' })}>
                     <SelectTrigger aria-label={t('plugin_report.report.filterType')}>
                       <SelectValue />
@@ -152,7 +156,7 @@ export function ReportDialog({ open, onOpenChange, editing }: Props) {
                     <SelectContent>
                       {datasets.map((d) => (
                         <SelectItem key={d.id} value={d.id}>
-                          {d.name}
+                          {builtinText(t, d.name)}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -164,7 +168,7 @@ export function ReportDialog({ open, onOpenChange, editing }: Props) {
                     <SelectContent>
                       {fieldsOf(f.datasetId, f.type === 'dateRange').map((c) => (
                         <SelectItem key={c.name} value={c.name}>
-                          {t(`plugin_report.field.${c.name}`, { defaultValue: c.label })}
+                          {fieldText(t, tableOf(f.datasetId), c.name, c.label)}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -182,6 +186,12 @@ export function ReportDialog({ open, onOpenChange, editing }: Props) {
                 {t('plugin_report.report.addFilter')}
               </Button>
             </fieldset>
+          </FormGridFull>
+          <FormGridFull>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="rp-remark">{t('common.remark')}</Label>
+              <Textarea id="rp-remark" rows={3} value={form.remark} maxLength={255} onChange={(e) => setForm({ ...form, remark: e.target.value })} />
+            </div>
           </FormGridFull>
         </FormGrid>
       </FormLayout>

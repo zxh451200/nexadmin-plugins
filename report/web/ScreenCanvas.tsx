@@ -5,6 +5,7 @@ import { queryScreenChart, type Chart, type Screen, type ScreenItem } from './ap
 import { ChartView } from './ChartView'
 import { GRID_COLS } from './chartData'
 import { useChartResult } from './useChartResult'
+import { builtinText } from './builtinText'
 
 export const ROW_PX = 40
 export const GAP_PX = 12
@@ -15,7 +16,7 @@ const itemHeight = (h: number) => h * ROW_PX + (h - 1) * GAP_PX
 function ScreenCell({ screenId, item, chart, refreshMs }: { screenId: string; item: ScreenItem; chart?: Chart; refreshMs: number }) {
   const { t } = useTranslation()
   const q = useChartResult(['screen', screenId, item.chartId], () => queryScreenChart(screenId, item.chartId), { enabled: !!chart, refetchMs: refreshMs })
-  const title = item.title || chart?.name || t('plugin_report.report.chartDeleted')
+  const title = builtinText(t, item.title || chart?.name) || t('plugin_report.report.chartDeleted')
   return (
     <section className="flex h-full min-w-0 flex-col overflow-hidden rounded-xl border border-border bg-card text-card-foreground" aria-label={title}>
       <h3 className="truncate px-3 text-sm font-medium text-muted-foreground" style={{ lineHeight: `${HEADER_PX}px` }}>
@@ -38,7 +39,7 @@ interface Props {
 
 /**
  * 大屏画布（只读）：24 列栅格，组件按 JSON 里的 x/y/w/h 摆放。
- * 手机上退化为按位置顺序的单列堆叠。颜色全部来自语义 token，深色效果由外层容器的 .dark 提供。
+ * 手机上退化为按位置顺序的单列堆叠。颜色全部来自语义 token，亮/暗跟应用主题走。
  */
 export function ScreenCanvas({ screen, refreshMs }: Props) {
   const isMobile = useIsMobile()

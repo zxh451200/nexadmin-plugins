@@ -9,7 +9,9 @@ import { Checkbox } from '@/framework/ui/checkbox'
 import { Input } from '@/framework/ui/input'
 import { Label } from '@/framework/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/framework/ui/select'
+import { Textarea } from '@/framework/ui/textarea'
 import { useChartOptions, useRoles, useSaveScreen, type Screen, type ScreenForm, type ScreenItem } from './api'
+import { builtinText, revertBuiltin } from './builtinText'
 import { canPlace, firstFreeSlot, GRID_COLS, GRID_ROWS } from './chartData'
 import { EditorCanvas } from './EditorCanvas'
 
@@ -39,7 +41,7 @@ export function ScreenDialog({ open, onOpenChange, editing }: Props) {
   }, [open, editing])
 
   const items = form.config.items
-  const names = useMemo(() => Object.fromEntries(charts.map((c) => [c.id, c.name])), [charts])
+  const names = useMemo(() => Object.fromEntries(charts.map((c) => [c.id, builtinText(t, c.name)])), [charts, t])
   const setItems = (next: ScreenItem[]) => setForm((f) => ({ ...f, config: { ...f.config, items: next } }))
   const cur = items[sel]
   const setCur = (p: Partial<ScreenItem>) => {
@@ -48,6 +50,12 @@ export function ScreenDialog({ open, onOpenChange, editing }: Props) {
     else toast.warning(t('plugin_report.screen.rejected'))
   }
   const addable = charts.filter((c) => !items.some((i) => i.chartId === c.id))
+  const noAddable = addable.length === 0
+  const pickPlaceholder = !noAddable
+    ? t('common.pleaseSelect')
+    : charts.length === 0
+      ? t('plugin_report.screen.noCharts')
+      : t('plugin_report.screen.allChartsAdded')
   const add = () => {
     const slot = firstFreeSlot(items, 8, 6)
     if (!pick || !slot) return toast.warning(t('plugin_report.screen.noSpace'))
@@ -60,7 +68,7 @@ export function ScreenDialog({ open, onOpenChange, editing }: Props) {
   const submit = async () => {
     if (!valid) return
     try {
-      await save.mutateAsync({ id: editing?.id, data: { ...form, name: form.name.trim() } })
+      await save.mutateAsync({ id: editing?.id, data: { ...form, name: revertBuiltin(t, editing?.name, form.name.trim()) } })
       toast.success(t('common.operateSuccess'))
       onOpenChange(false)
     } catch {
@@ -102,12 +110,12 @@ export function ScreenDialog({ open, onOpenChange, editing }: Props) {
       >
         <FormGrid cols={3}>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="sc-name">{t('common.name')}</Label>
-            <Input id="sc-name" value={form.name} maxLength={100} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+            <Label htmlFor="sc-name" required>{t('common.name')}</Label>
+            <Input id="sc-name" value={builtinText(t, form.name)} maxLength={100} onChange={(e) => setForm({ ...form, name: e.target.value })} />
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="sc-title">{t('plugin_report.screen.title')}</Label>
-            <Input id="sc-title" value={form.config.title ?? ''} maxLength={100} onChange={(e) => setForm({ ...form, config: { ...form.config, title: e.target.value } })} />
+            <Input id="sc-title" value={builtinText(t, form.config.title)} maxLength={100} onChange={(e) => setForm({ ...form, config: { ...form.config, title: e.target.value } })} />
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="sc-refresh">{t('plugin_report.screen.refresh')}</Label>
@@ -128,14 +136,14 @@ export function ScreenDialog({ open, onOpenChange, editing }: Props) {
             <div className="flex flex-wrap items-end gap-2">
               <div className="flex min-w-48 flex-1 flex-col gap-2">
                 <Label htmlFor="sc-pick">{t('plugin_report.screen.addChart')}</Label>
-                <Select value={pick} onValueChange={setPick}>
+                <Select value={pick} onValueChange={setPick} disabled={noAddable}>
                   <SelectTrigger id="sc-pick">
-                    <SelectValue placeholder={t('common.pleaseSelect')} />
+                    <SelectValue placeholder={pickPlaceholder} />
                   </SelectTrigger>
                   <SelectContent>
                     {addable.map((c) => (
                       <SelectItem key={c.id} value={c.id}>
-                        {c.name}
+                        {builtinText(t, c.name)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -153,10 +161,10 @@ export function ScreenDialog({ open, onOpenChange, editing }: Props) {
           </FormGridFull>
           {cur ? (
             <FormGridFull>
-              <div className="grid grid-cols-2 gap-2 rounded-md border border-border p-3 md:grid-cols-6">
+              <div className="grid grid-cols-2 gap-2 rounded-md bg-muted/40 p-3 md:grid-cols-6">
                 <div className="col-span-2 flex flex-col gap-1">
                   <Label htmlFor="sc-item-title">{t('plugin_report.screen.itemTitle')}</Label>
-                  <Input id="sc-item-title" value={cur.title ?? ''} maxLength={100} placeholder={names[cur.chartId]} onChange={(e) => setCur({ title: e.target.value })} />
+                  <Input id="sc-item-title" value={builtinText(t, cur.title)} maxLength={100} placeholder={names[cur.chartId]} onChange={(e) => setCur({ title: e.target.value })} />
                 </div>
                 {num('x', GRID_COLS - 1, 'X')}
                 {num('y', GRID_ROWS - 1, 'Y')}
@@ -187,6 +195,12 @@ export function ScreenDialog({ open, onOpenChange, editing }: Props) {
                 ))}
               </div>
             </fieldset>
+          </FormGridFull>
+          <FormGridFull>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="sc-remark">{t('common.remark')}</Label>
+              <Textarea id="sc-remark" rows={3} value={form.remark} maxLength={255} onChange={(e) => setForm({ ...form, remark: e.target.value })} />
+            </div>
           </FormGridFull>
         </FormGrid>
       </FormLayout>
