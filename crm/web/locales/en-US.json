@@ -1,0 +1,81 @@
+{
+  "plugin_crm": {
+    "title": "Customer Master",
+    "description": "Free Customer master data and lead/opportunity ledger; members from hotel, mall and other systems can resolve to the same customer, without sales automation",
+    "dir": "Customer Master",
+    "menu": "Customer Master",
+    "perm": {
+      "edit": "Manage customers",
+      "opp": "Manage leads/opportunities"
+    },
+    "tabs": {
+      "customers": "Customers",
+      "opportunities": "Leads / Opportunities"
+    },
+    "all": "All",
+    "empty": "No data",
+    "searchPlaceholder": "Customer name / code / external no",
+    "nameRequired": "Customer name is required",
+    "titleRequired": "Title is required",
+    "externalNoRequired": "Enter the customer number from the external system",
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "level": {
+      "A": "A (key)",
+      "B": "B (normal)",
+      "C": "C (watch)",
+      "none": "Not set"
+    },
+    "stage": {
+      "lead": "Lead",
+      "qualified": "Qualified",
+      "proposal": "Proposal",
+      "negotiate": "Negotiation",
+      "won": "Won",
+      "lost": "Lost"
+    },
+    "source": {
+      "hotel": "Hotel system",
+      "mall": "Mall system",
+      "order": "Order system",
+      "manual": "Manual ID"
+    },
+    "fields": {
+      "name": "Name",
+      "code": "Code",
+      "level": "Level",
+      "status": "Status",
+      "externalAnchor": "External source",
+      "externalSource": "External source",
+      "externalNo": "External No",
+      "owner": "Owner",
+      "phone": "Phone",
+      "email": "Email",
+      "remark": "Remark",
+      "customerId": "Customer",
+      "title": "Title",
+      "stage": "Stage",
+      "amountMinor": "Amount",
+      "expectedAt": "Expected Close",
+      "createdAt": "Created"
+    },
+    "customer": {
+      "create": "New Customer",
+      "edit": "Edit Customer",
+      "deleteConfirm": "Delete customer {{name}}?",
+      "noAnchor": "No external system",
+      "codePlaceholder": "Auto-generated if empty",
+      "codeHint": "Leave the code empty to auto-generate one (C- prefix); it is only used for list display and search. You can also enter your own code. Level is for display only.",
+      "anchorHint": "Pick the external system and enter its customer number so the member resolves to the same customer; it cannot be changed after creation."
+    },
+    "opp": {
+      "create": "New Lead / Opportunity",
+      "edit": "Edit Lead / Opportunity",
+      "deleteConfirm": "Delete \"{{title}}\"?",
+      "noCustomer": "No customer yet",
+      "searchPlaceholder": "Title"
+    }
+  }
+}

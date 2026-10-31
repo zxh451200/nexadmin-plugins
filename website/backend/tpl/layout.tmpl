@@ -1,0 +1,257 @@
+{{define "layout"}}<!doctype html>
+<html lang="{{.Lang.HTMLLang}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{.Title}}</title>
+{{if .Desc}}<meta name="description" content="{{.Desc}}">{{end}}
+{{if .SeoKeywords}}<meta name="keywords" content="{{.SeoKeywords}}">{{end}}
+{{if .Noindex}}<meta name="robots" content="noindex">{{end}}
+<link rel="canonical" href="{{.BaseURL}}{{.Path}}">
+{{range .Languages}}<link rel="alternate" hreflang="{{.HTMLLang}}" href="{{$.BaseURL}}{{$.Alternate .}}">{{end}}
+{{range .Languages}}{{if .Default}}<link rel="alternate" hreflang="x-default" href="{{$.BaseURL}}{{$.Alternate .}}">{{end}}{{end}}
+<meta name="theme-color" content="#08090a">
+<script>
+/* 配色防闪烁：默认深色（与 Linear 一致），访客可切到浅色并记住。 */
+(function () {
+  var scheme = 'dark';
+  try { if (localStorage.getItem('nex-site-theme') === 'light') scheme = 'light'; } catch (e) { /* ignore */ }
+  document.documentElement.setAttribute('data-scheme', scheme);
+  document.documentElement.classList.add('js');
+  var meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', scheme === 'light' ? '#f7f8f8' : '#08090a');
+})();
+</script>
+<link rel="icon" href="/website-assets/favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="{{.SiteName}}">
+<meta property="og:title" content="{{.Title}}">
+<meta property="og:description" content="{{.Desc}}">
+<meta property="og:url" content="{{.BaseURL}}{{.Path}}">
+<meta property="og:image" content="{{if .OGImage}}{{.OGImage}}{{else}}{{.BaseURL}}/website-assets/og.png{{end}}">
+{{if not .OGImage}}<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">{{end}}
+<meta property="og:locale" content="{{.Lang.OGLocale}}">
+{{range .Languages}}{{if ne .Code $.Lang.Code}}<meta property="og:locale:alternate" content="{{.OGLocale}}">{{end}}{{end}}
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{.Title}}">
+<meta name="twitter:description" content="{{.Desc}}">
+<meta name="twitter:image" content="{{if .OGImage}}{{.OGImage}}{{else}}{{.BaseURL}}/website-assets/og.png{{end}}">
+{{if .PluginLD}}<script type="application/ld+json">{{.PluginLD}}</script>{{end}}
+<link rel="stylesheet" href="/website-assets/site.css?v={{assetV "site.css"}}">
+<noscript><style>
+[data-reveal],.tl{opacity:1;transform:none}
+[role="tabpanel"][hidden]{display:block !important}
+@media (max-width:900px){
+  .nav-toggle{display:none !important}
+  .mobile-nav[hidden]{display:block !important;position:static;padding:0 24px 10px;border-bottom:1px solid var(--border)}
+  .mobile-nav nav{display:flex;flex-wrap:wrap;gap:0 18px}
+  .mobile-nav a{padding:8px 0;border:0}
+}
+</style></noscript>
+</head>
+<body>
+<a class="skip-link" href="#main">{{.T "layout.skip"}}</a>
+{{if .Suggest}}
+<div class="lang-banner" data-lang-banner>
+  <div class="container lang-banner-in">
+    <span class="lang-banner-icon" aria-hidden="true">{{icon "globe"}}</span>
+    <span>{{.TF "lang.suggest" .SuggestLang.Label}}</span>
+    <a class="lang-banner-cta" href="{{.Alternate .SuggestLang}}" hreflang="{{.SuggestLang.HTMLLang}}" lang="{{.SuggestLang.HTMLLang}}">{{.TF "lang.suggestCta" .SuggestLang.Label}} →</a>
+    <button class="lang-banner-close" type="button" data-lang-banner-close aria-label="{{.T "lang.close"}}">×</button>
+  </div>
+</div>
+{{end}}
+<header class="topbar" id="top">
+  <div class="container topbar-in">
+    <a class="brand" href="{{.Home}}" aria-label="{{.TF "layout.homeAria" .SiteName}}">
+      {{if .LogoURL}}<img class="brand-logo" src="{{.LogoURL}}" alt="{{.SiteName}}">{{else}}<span class="brand-mark" aria-hidden="true">{{initial .SiteName}}</span>{{end}}
+      <span class="brand-name">{{.SiteName}}</span>
+    </a>
+    <nav class="topnav" aria-label="{{.T "layout.mainNav"}}">
+      {{range .Navs}}{{if .Children}}
+      <div class="nav-item has-sub">
+        <a href="{{$.URL .Href}}"{{if eq .Href $.Route}} aria-current="page"{{end}}>{{.Label}}</a>
+        <button class="nav-caret" type="button" data-nav-toggle aria-expanded="false" aria-label="{{$.TF "layout.subNav" .Label}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+        <ul class="nav-sub">
+          {{range .Children}}
+          <li{{if .Children}} class="has-sub"{{end}}>
+            <a href="{{$.URL .Href}}"{{if eq .Href $.Route}} aria-current="page"{{end}}>{{.Label}}</a>
+            {{if .Children}}
+            <ul class="nav-sub nav-sub-3">
+              {{range .Children}}<li><a href="{{$.URL .Href}}"{{if eq .Href $.Route}} aria-current="page"{{end}}>{{.Label}}</a></li>{{end}}
+            </ul>
+            {{end}}
+          </li>
+          {{end}}
+        </ul>
+      </div>
+      {{else}}<a href="{{$.URL .Href}}"{{if eq .Href $.Route}} aria-current="page"{{end}}>{{.Label}}</a>{{end}}{{end}}
+      {{if .MarketEnabled}}<a href="{{.URL "/plugins"}}"{{if hasPrefix .Route "/plugins"}} aria-current="page"{{end}}>{{.T "layout.market"}}</a>{{end}}
+      {{if .DocsEnabled}}<a href="{{.URL "/docs"}}"{{if hasPrefix .Route "/docs"}} aria-current="page"{{end}}>{{.T "layout.docs"}}</a>{{end}}
+    </nav>
+    <div class="topbar-actions">
+      <button class="theme-toggle" type="button" data-theme-toggle aria-label="{{.T "layout.theme"}}" title="{{.T "layout.theme"}}">
+        <svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+      <details class="lang-switch">
+        <summary aria-label="{{.T "layout.lang"}}">{{icon "globe"}}<span>{{.Lang.Short}}</span></summary>
+        <div class="lang-menu">
+          {{range .Languages}}<a href="{{$.Switch .}}" hreflang="{{.HTMLLang}}" lang="{{.HTMLLang}}"{{if eq .Code $.Lang.Code}} aria-current="true"{{end}}>{{.Label}}</a>{{end}}
+        </div>
+      </details>
+      <a class="btn btn-primary btn-sm" href="/admin/login">{{.T "layout.login"}}</a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="mobile-nav" aria-label="{{.T "layout.openMenu"}}">
+        <span></span><span></span>
+      </button>
+    </div>
+  </div>
+  <div class="mobile-nav" id="mobile-nav" hidden>
+    <nav aria-label="{{.T "layout.mobileNav"}}">
+      {{range .Navs}}
+      <a href="{{$.URL .Href}}"{{if eq .Href $.Route}} aria-current="page"{{end}}>{{.Label}}</a>
+      {{if .Children}}
+      <ul class="mobile-sub">
+        {{range .Children}}
+        <li>
+          <a href="{{$.URL .Href}}"{{if eq .Href $.Route}} aria-current="page"{{end}}>{{.Label}}</a>
+          {{if .Children}}
+          <ul class="mobile-sub">
+            {{range .Children}}<li><a href="{{$.URL .Href}}"{{if eq .Href $.Route}} aria-current="page"{{end}}>{{.Label}}</a></li>{{end}}
+          </ul>
+          {{end}}
+        </li>
+        {{end}}
+      </ul>
+      {{end}}
+      {{end}}
+      {{if .MarketEnabled}}<a href="{{.URL "/plugins"}}"{{if hasPrefix .Route "/plugins"}} aria-current="page"{{end}}>{{.T "layout.market"}}</a>{{end}}
+      {{if .DocsEnabled}}<a href="{{.URL "/docs"}}"{{if hasPrefix .Route "/docs"}} aria-current="page"{{end}}>{{.T "layout.docs"}}</a>{{end}}
+      {{range .Languages}}<a href="{{$.Switch .}}" hreflang="{{.HTMLLang}}" lang="{{.HTMLLang}}"{{if eq .Code $.Lang.Code}} aria-current="true"{{end}}>{{.Label}}</a>{{end}}
+      <a href="/admin/login">{{.T "layout.login"}}</a>
+    </nav>
+  </div>
+</header>
+<main id="main">
+{{template "content" .}}
+</main>
+<footer class="site-footer">
+  <div class="container footer-grid{{if .FriendLinks}} footer-grid-wide{{end}}">
+    <div class="footer-brand">
+      <a class="brand" href="{{.Home}}">
+        {{if .LogoURL}}<img class="brand-logo" src="{{.LogoURL}}" alt="{{.SiteName}}">{{else}}<span class="brand-mark" aria-hidden="true">{{initial .SiteName}}</span>{{end}}
+        <span class="brand-name">{{.SiteName}}</span>
+      </a>
+      {{if .SiteDesc}}<p class="footer-desc">{{.SiteDesc}}</p>{{end}}
+    </div>
+    <nav class="footer-col" aria-label="{{.T "layout.product"}}">
+      <h4>{{.T "layout.product"}}</h4>
+      <a href="{{.Home}}">{{.T "layout.home"}}</a>
+      {{if .MarketEnabled}}<a href="{{.URL "/plugins"}}">{{.T "layout.marketFull"}}</a>{{end}}
+      <a href="/admin/login">{{.T "layout.admin"}}</a>
+    </nav>
+    <nav class="footer-col" aria-label="{{.T "layout.docs"}}">
+      <h4>{{.T "layout.docs"}}</h4>
+      <a href="{{.URL "/docs"}}">{{.T "layout.docsCenter"}}</a>
+      <a href="{{.URL "/docs/features"}}">{{.T "layout.docsFeatures"}}</a>
+      <a href="{{.URL "/docs/config"}}">{{.T "layout.docsConfig"}}</a>
+      <a href="{{.URL "/docs/deploy"}}">{{.T "layout.docsDeploy"}}</a>
+      <a href="{{.URL "/docs/plugin-dev"}}">{{.T "layout.docsPlugin"}}</a>
+      <a href="{{.URL "/docs/dev-guide"}}">{{.T "layout.docsDev"}}</a>
+    </nav>
+    <nav class="footer-col" aria-label="{{.T "layout.resources"}}">
+      <h4>{{.T "layout.resources"}}</h4>
+      <a href="{{.URL "/news"}}">{{.T "layout.news"}}</a>
+      <a href="{{.URL "/p/about"}}">{{.T "layout.about"}}</a>
+      <a href="{{.URL "#quickstart"}}">{{.T "layout.quickstart"}}</a>
+    </nav>
+    {{if .FriendLinks}}
+    <nav class="footer-col" aria-label="{{.T "layout.friends"}}">
+      <h4>{{.T "layout.friends"}}</h4>
+      {{range .FriendLinks}}<a href="{{.URL}}" target="_blank" rel="noopener noreferrer nofollow">{{.Name}}</a>{{end}}
+    </nav>
+    {{end}}
+    <nav class="footer-col" aria-label="{{.T "layout.contact"}}">
+      <h4>{{.T "layout.contact"}}</h4>
+      <a href="{{.URL "/contact"}}">{{.T "layout.contactUs"}}</a>
+      {{if .ContactEmail}}<a class="footer-mail" href="mailto:{{.ContactEmail}}" data-copy-email="{{.ContactEmail}}" title="{{.T "site.js.emailCopy"}}">{{.ContactEmail}}</a>{{end}}
+      {{if .ContactPhone}}<a class="footer-tel" href="tel:{{.ContactPhone}}">{{.ContactPhone}}</a>{{end}}
+      {{if .Socials}}
+      <ul class="footer-social" aria-label="{{.T "layout.social"}}">
+        {{range .Socials}}<li><a href="{{.URL}}" target="_blank" rel="noopener noreferrer nofollow" aria-label="{{$.SocialLabel .Platform}}" title="{{$.SocialLabel .Platform}}">{{socialIcon .Platform}}</a></li>{{end}}
+      </ul>
+      {{end}}
+      {{if .QRCodeURL}}
+      <figure class="footer-qr">
+        <img src="{{.QRCodeURL}}" alt="{{if .QRCodeCaption}}{{.QRCodeCaption}}{{else}}{{.T "layout.qrAlt"}}{{end}}" loading="lazy" width="96" height="96">
+        {{if .QRCodeCaption}}<figcaption>{{.QRCodeCaption}}</figcaption>{{end}}
+      </figure>
+      {{end}}
+      {{if .ICP}}<a class="footer-icp" href="https://beian.miit.gov.cn/" rel="noopener noreferrer" target="_blank">{{.ICP}}</a>{{end}}
+    </nav>
+  </div>
+  <div class="container footer-bottom">
+    <span>© {{.Year}} {{.SiteName}}</span>
+    {{if .FooterNote}}<span class="footer-note">{{.FooterNote}}</span>{{end}}
+  </div>
+</footer>
+<!-- 在线客服挂件：默认隐藏，由 site.js 探测 /api/v1/plugins/im/visitor/status 后再显示（没装 im 插件时整组 404）。 -->
+<div class="chat" data-chat hidden>
+  <button class="chat-launcher" type="button" data-chat-open aria-haspopup="dialog" aria-expanded="false" aria-controls="chat-panel" aria-label="{{.T "chat.open"}}">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-8.5 8.3 8.9 8.9 0 0 1-3.5-.7L4 21l1.8-4.6A8.3 8.3 0 0 1 3.5 11.5 8.4 8.4 0 0 1 12 3.2a8.4 8.4 0 0 1 9 8.3z"/></svg>
+    <span>{{.T "chat.launcher"}}</span>
+  </button>
+  <section class="chat-panel" id="chat-panel" data-chat-panel role="dialog" aria-modal="false" aria-labelledby="chat-title" hidden>
+    <header class="chat-head">
+      <div class="chat-identity">
+        <span class="chat-dot" aria-hidden="true"></span>
+        <div class="chat-identity-text">
+          <strong id="chat-title">{{.T "chat.title"}}</strong>
+          <span class="chat-sub">{{.T "chat.subtitle"}}</span>
+        </div>
+      </div>
+      <button class="chat-close" type="button" data-chat-close aria-label="{{.T "chat.close"}}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </header>
+    <p class="chat-offline" data-chat-offline hidden>{{.T "chat.offline"}}</p>
+    <div class="chat-log" data-chat-log role="log" aria-live="polite" aria-relevant="additions">
+      <p class="chat-empty" data-chat-empty>{{.T "chat.empty"}}</p>
+    </div>
+    <p class="chat-typing" data-chat-typing hidden>{{.T "chat.typing"}}</p>
+    <form class="chat-form" data-chat-form>
+      <button class="chat-attach" type="button" data-chat-attach aria-label="{{.T "chat.attach"}}" title="{{.T "chat.attach"}}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.4 11.05l-8.49 8.49a5 5 0 0 1-7.07-7.07l8.49-8.49a3 3 0 0 1 4.24 4.24l-8.49 8.49a1 1 0 0 1-1.41-1.41l7.78-7.78"/></svg>
+      </button>
+      <input type="file" data-chat-file hidden accept="image/png,image/jpeg,image/gif,image/webp,application/pdf,text/plain,.zip,.docx,.xlsx,.pptx">
+      <label class="sr-only" for="chat-input">{{.T "chat.inputLabel"}}</label>
+      <textarea id="chat-input" data-chat-input rows="1" maxlength="2000" placeholder="{{.T "chat.placeholder"}}" aria-label="{{.T "chat.placeholder"}}"></textarea>
+      <button class="chat-send" type="submit" data-chat-send aria-label="{{.T "chat.send"}}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg>
+      </button>
+    </form>
+    <div class="chat-closed" data-chat-closed hidden>
+      <p class="chat-closed-title" data-chat-closed-title>{{.T "chat.closedTitle"}}</p>
+      <div class="chat-rating" data-chat-rating hidden>
+        <p class="chat-rating-title" data-chat-rating-title>{{.T "chat.rateTitle"}}</p>
+        <div class="chat-stars" data-chat-stars role="group" aria-label="{{.T "chat.rateTitle"}}">
+          <button type="button" data-rate="1" aria-label="1">★</button>
+          <button type="button" data-rate="2" aria-label="2">★</button>
+          <button type="button" data-rate="3" aria-label="3">★</button>
+          <button type="button" data-rate="4" aria-label="4">★</button>
+          <button type="button" data-rate="5" aria-label="5">★</button>
+        </div>
+        <p class="chat-thanks" data-chat-thanks hidden>{{.T "chat.rateThanks"}}</p>
+        <textarea data-chat-rating-comment rows="2" maxlength="500" placeholder="{{.T "chat.rateComment"}}" aria-label="{{.T "chat.rateComment"}}"></textarea>
+        <button type="button" class="chat-new" data-chat-rating-submit disabled>{{.T "chat.rateSubmit"}}</button>
+      </div>
+      <button type="button" class="chat-new" data-chat-new>{{.T "chat.startNew"}}</button>
+    </div>
+  </section>
+</div>
+<script type="application/json" id="site-i18n">{{.JSStrings}}</script>
+<script src="/website-assets/chat-widget.js?v={{assetV "chat-widget.js"}}" defer></script>
+<script src="/website-assets/site.js?v={{assetV "site.js"}}" defer></script>
+</body>
+</html>{{end}}

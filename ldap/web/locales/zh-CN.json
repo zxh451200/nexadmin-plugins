@@ -1,0 +1,19 @@
+{
+  "plugin_ldap": {
+    "title": "LDAP/AD 登录",
+    "description": "免费基础 LDAP/AD 登录：本地密码失败后自动尝试 LDAP 校验；插件需按需安装",
+    "menu": "LDAP 配置",
+    "enabled": "启用 LDAP 登录",
+    "host": "LDAP 服务器地址",
+    "port": "端口",
+    "matchExisting": "绑定同名本地账号",
+    "autoCreate": "自动建号",
+    "pwKeep": "留空表示不修改",
+    "test": "连通性测试",
+    "testOk": "LDAP 连接正常",
+    "on": "已启用",
+    "off": "未启用",
+    "caCert": "CA 证书（PEM，可选）",
+    "caCertHint": "留空使用系统根证书；内网自签 CA 请粘贴证书内容（可含多张）。"
+  }
+}

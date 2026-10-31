@@ -1,0 +1,43 @@
+{
+  "plugin_imports": {
+    "title": "Import Center",
+    "description": "Free CSV / XLSX import: template download, row validation, error report. Multiple files at once.",
+    "menu": "Import Center",
+    "perm": {
+      "run": "Run imports"
+    },
+    "all": "All",
+    "empty": "No imports yet",
+    "noSourcesTitle": "No import sources yet",
+    "noSources": "No importable data tables yet. Once a module is wired for import, its sources and templates show up here.",
+    "pickFileFirst": "Pick a source and files first",
+    "doneSummary": "Import finished: {{ok}} ok, {{fail}} failed",
+    "downloadTemplate": "Download template",
+    "templateCsv": "CSV template (opens in Excel)",
+    "templateXlsx": "XLSX template",
+    "run": "Start import",
+    "errorsCsv": "Failed rows",
+    "filesSelected": "{{count}} files selected",
+    "removeFile": "Remove {{name}}",
+    "batchDone": "{{ok}} file(s) submitted, {{fail}} failed",
+    "delete": "Delete",
+    "deleteConfirm": "Delete the import record for \"{{name}}\"? Imported data is not affected.",
+    "fields": {
+      "source": "Source",
+      "file": "CSV / XLSX file",
+      "fileName": "File",
+      "totalRows": "Total",
+      "okRows": "OK",
+      "failRows": "Failed",
+      "status": "Status",
+      "createdBy": "By",
+      "createdAt": "Time"
+    },
+    "status": {
+      "pending": "Queued",
+      "running": "Processing",
+      "done": "Done",
+      "failed": "Failed"
+    }
+  }
+}

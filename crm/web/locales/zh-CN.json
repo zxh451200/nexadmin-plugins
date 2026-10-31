@@ -1,0 +1,81 @@
+{
+  "plugin_crm": {
+    "title": "客户主数据",
+    "description": "免费统一维护客户资料与线索/商机；酒店、商城等系统的会员可对应到同一个客户，不做销售自动化",
+    "dir": "客户主数据",
+    "menu": "客户主数据",
+    "perm": {
+      "edit": "维护客户",
+      "opp": "维护线索/商机"
+    },
+    "tabs": {
+      "customers": "客户",
+      "opportunities": "线索/商机"
+    },
+    "all": "全部",
+    "empty": "暂无数据",
+    "searchPlaceholder": "客户名称 / 编码 / 外部编号",
+    "nameRequired": "请填写客户名称",
+    "titleRequired": "请填写标题",
+    "externalNoRequired": "请填写对方系统的客户编号",
+    "status": {
+      "active": "在营",
+      "inactive": "停用"
+    },
+    "level": {
+      "A": "A 级（重点）",
+      "B": "B 级（普通）",
+      "C": "C 级（观察）",
+      "none": "未设置"
+    },
+    "stage": {
+      "lead": "线索",
+      "qualified": "确认",
+      "proposal": "方案",
+      "negotiate": "谈判",
+      "won": "赢单",
+      "lost": "输单"
+    },
+    "source": {
+      "hotel": "酒店系统",
+      "mall": "商城系统",
+      "order": "订单系统",
+      "manual": "手工指定编号"
+    },
+    "fields": {
+      "name": "客户名称",
+      "code": "客户编码",
+      "level": "等级",
+      "status": "状态",
+      "externalAnchor": "外部来源",
+      "externalSource": "外部来源",
+      "externalNo": "外部编号",
+      "owner": "负责人",
+      "phone": "电话",
+      "email": "邮箱",
+      "remark": "备注",
+      "customerId": "所属客户",
+      "title": "标题",
+      "stage": "阶段",
+      "amountMinor": "金额",
+      "expectedAt": "预期成交日",
+      "createdAt": "创建时间"
+    },
+    "customer": {
+      "create": "新建客户",
+      "edit": "编辑客户",
+      "deleteConfirm": "确认删除客户 {{name}}？",
+      "noAnchor": "不关联外部系统",
+      "codePlaceholder": "留空自动生成",
+      "codeHint": "客户编码留空会自动生成（C- 前缀），仅用于列表展示与搜索；也可以填你们自己的编号。等级只影响展示，不做业务判定。",
+      "anchorHint": "选择外部系统并填写对方系统的客户编号后，该会员会对应到同一个客户；创建后不可修改。"
+    },
+    "opp": {
+      "create": "新建线索/商机",
+      "edit": "编辑线索/商机",
+      "deleteConfirm": "确认删除「{{title}}」？",
+      "noCustomer": "暂不关联客户",
+      "searchPlaceholder": "标题"
+    }
+  }
+}

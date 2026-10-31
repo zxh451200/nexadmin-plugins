@@ -1,0 +1,32 @@
+id: crm
+name: 客户主数据
+version: 0.1.0
+description: 免费基础客户主数据 + 线索商机台账：让酒店、商城等外部系统的会员对应到同一个客户；不做销售自动化。
+author: NexAdmin
+edition: free
+requires_nexadmin: ">=0.1.0"
+migration_target: tenant
+menus:
+  - parent: /
+    type: dir
+    title: plugin_crm.dir
+    path: /crm
+    icon: Users
+    sort: 70
+  - parent: /crm
+    type: menu
+    title: plugin_crm.menu
+    path: /crm/customers
+    component: plugins/crm/CrmPage
+    perm: crm:list
+    icon: Contact
+    sort: 1
+    keep_alive: true
+  - parent: crm:list
+    type: button
+    title: plugin_crm.perm.edit
+    perm: crm:edit
+  - parent: crm:list
+    type: button
+    title: plugin_crm.perm.opp
+    perm: crm:opp
