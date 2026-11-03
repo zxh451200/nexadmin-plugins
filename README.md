@@ -16,6 +16,7 @@ NexAdmin 后台框架的官方插件源码集中在此，每个顶级目录一�
 | imports | 0.1.0 | free | 通用 CSV / XLSX 导入中心 |
 | ldap | 0.1.0 | free | LDAP/AD 登录适配 |
 | maps | 0.1.0 | free | 地图服务（高德 / 百度 / 谷歌，按需启用） |
+| realname | 0.1.0 | free | 证件实名：身份证校验解析、二要素在线核验（provider 默认关闭）、核验台账留痕 |
 | report | 1.0.0 | pro | 报表中心 + 数据大屏 |
 | saml | 0.1.0 | pro | SAML 2.0 单点登录 |
 | scim | 1.0.0 | pro | SCIM 2.0 用户同步 |
